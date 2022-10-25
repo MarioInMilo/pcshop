@@ -1,0 +1,13 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  datasource:
+    url: jdbc:mysql://localhost:3306/myshop
+    username: root
+    password: obviouslynotall8390038
+  main:
+      allow-circular-references: true
+#  flyway:
+#    baseline-on-migrate: true

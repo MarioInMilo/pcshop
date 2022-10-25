@@ -1,0 +1,31 @@
+<div th:fragment="header" id="head" xmlns:th="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml">
+    <div class="container">
+        <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+            <a href="/" class="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none">
+                <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap">
+                    <use xlink:href="#bootstrap"></use>
+                </svg>
+            </a>
+
+            <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+                <li><a th:href="@{/}" class="nav-link px-2 link-secondary">Home</a></li>
+                <li><a th:href="@{/products}" class="nav-link px-2 link-dark">Products</a></li>
+                <li><a th:href="@{/basket}" class="nav-link px-2 link-dark">Basket</a></li>
+                <li><a th:href="@{/faq}" class="nav-link px-2 link-dark">FAQs</a></li>
+<!--                <li sec:authorize="hasAnyAuthority('ADMIN', 'MANAGER')"><a th:href="@{/users}" class="nav-link px-2 link-dark">Users</a></li>-->
+            </ul>
+
+            <div class="col-md-3 text-end">
+                <!--                    если пользователь не авторизован-->
+                <div sec:authorize="!isAuthenticated()">
+                <button type="button" class="btn btn-outline-primary me-2">Log in</button>
+                <button type="button" class="btn btn-primary">Sign-up</button>
+                </div>
+                <div sec:authorize="isAuthenticated()">
+<!--                    если пользователь авторизован-->
+                    <button type="button" class="btn btn-outline-primary me-2">Log Out</button>
+                </div>
+            </div>
+        </header>
+    </div>
+</div>
