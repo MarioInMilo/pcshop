@@ -22,35 +22,35 @@ import javax.persistence.Basic;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true)
-
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private UserService service;
 
     @Override
-    protected void configure(@NotNull AuthenticationManagerBuilder auth){
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.authenticationProvider(authenticationProvider());
     }
 
-    @Basic
-    private AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(service);
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
-        return authenticationProvider;
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider auth = new DaoAuthenticationProvider();
+        auth.setUserDetailsService(service);
+        auth.setPasswordEncoder(passwordEncoder());
+        return auth;
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/users").hasAnyAuthority(Role.ADMIN.name(), Role.MANAGER.name())
-                .antMatchers("/users/new").hasAuthority(Role.ADMIN.name())
+                .antMatchers("/ws").permitAll()
+                .antMatchers("/users/get")
+                .hasAnyAuthority(Role.ADMIN.name(), Role.MANAGER.name(), Role.DIRECTOR.name())
                 .anyRequest().permitAll()
                 .and()
                 .formLogin()
