@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.CascadeType;
 import javax.persistence.EnumType;
@@ -17,9 +18,13 @@ import javax.persistence.OneToOne;
 @AllArgsConstructor
 @Builder
 public class UserDTO {
+    private Long id;
     private String username;
     private String password;
     private String matching;
     private String email;
     private Basket basket;
+    private Boolean archive;
+    private Role role;
+
 }
