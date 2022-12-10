@@ -12,8 +12,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     User findFirstByRole(String role);
 
-//    @Query(name = "UPDATE users SET role := 'roles' WHERE id := var")
-//    User roleUpdateUser(@Param("role") String role, @Param("var") Integer id);
-//
-//    User updateRoleById(String role, Long id);
+    User findByActivationCode(String code);
+
 }
