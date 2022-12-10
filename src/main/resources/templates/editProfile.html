@@ -16,29 +16,30 @@
                     <div class="card-body p-4 p-md-5">
                         <h3 class="mb-4 pb-2 pb-md-0 mb-md-5">Edit Form</h3>
                         <div th:each="el : ${user}">
-                            <form>
+                            <form method="post">
                                 <div class="row">
                                     <div class="col-md-6 mb-4">
                                         <div class="form-outline">
-                                            <input th:value="${el.username}" type="text" id="firstName"
+                                            <input th:value="${el.username}" name="username" type="text" id="firstName"
                                                    class="form-control form-control-lg"/>
                                             <label class="form-label" for="firstName">Login</label>
                                         </div>
                                     </div>
                                     <div class="col-md-6 mb-4">
                                         <div class="form-outline">
-                                            <input th:value="${el.email}" type="email" id="emailAddress"
+                                            <input th:value="${el.email}" name="email"  type="email" id="emailAddress"
                                                    class="form-control form-control-lg"/>
                                             <label class="form-label" for="emailAddress">Email</label>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-12">
-                                            <select class="select form-control-lg">
-                                                <option value="1" disabled>Role</option>
-                                                <option value="2">USER</option>
-                                                <option value="3">ADMIN</option>
-                                                <option value="4">DIRECTOR</option>
+                                            <select  th:value="${el.role}" name="role" class="select form-control-lg">
+                                                <option value="null" disabled>Role</option>
+                                                <option value="CLIENT">CLIENT</option>
+                                                <option value="MANAGER">MANAGER</option>
+                                                <option value="ADMIN">ADMIN</option>
+                                                <option value="DIRECTOR">DIRECTOR</option>
                                             </select>
                                         </div>
                                     </div>
@@ -54,6 +55,5 @@
         </div>
     </div>
 </section>
-
 </body>
 </html>
