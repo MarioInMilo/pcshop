@@ -8,7 +8,7 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface ProductMapper {
         ProductMapper MAPPER = Mappers.getMapper(ProductMapper.class);
 
@@ -21,24 +21,5 @@ public interface ProductMapper {
 
         List<ProductDTO> fromProductList(List<Product> products);
 
-
-//        UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
-//        ProductDTO toDTO(Product product);
-//        Product DTOto(ProductDTO productDTO);
-//        //    public static ProductDTO toProductDTO(Product product){
-////        return ProductDTO.builder()
-////                .price(product.getPrice())
-////                .title(product.getTitle())
-////                .categories(product.getCategories())
-////                .build();
-////    }
-////
-////    public static Product fromProductDTO (ProductDTO productDTO){
-////        return Product.builder()
-////                .categories(productDTO.getCategories())
-////                .price(productDTO.getPrice())
-////                .title(productDTO.getTitle())
-////                .build();
-////    }
 
 }
