@@ -2,12 +2,17 @@ package by.itstep.picshop.service.impl;
 
 import by.itstep.picshop.bean.request.CreateUserRequest;
 import by.itstep.picshop.bean.response.CreateUserResponse;
+import by.itstep.picshop.config.SecurityConfig;
 import by.itstep.picshop.dto.UserDTO;
+import by.itstep.picshop.mapper.MapperUser;
 import by.itstep.picshop.mapper.UseMapper;
 import by.itstep.picshop.model.Role;
 import by.itstep.picshop.model.User;
 import by.itstep.picshop.repository.UserRepository;
+import by.itstep.picshop.service.BasketService;
+import by.itstep.picshop.service.MailSender;
 import by.itstep.picshop.service.UserService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,11 +21,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +35,8 @@ public class UserServiceImplements implements UserService {
     private UserRepository repository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private MailSender mailSender;
 
     private final UseMapper mapper = UseMapper.MAPPER;
 
@@ -37,7 +44,7 @@ public class UserServiceImplements implements UserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean save(UserDTO userDTO) {
-        if (Objects.equals(userDTO.getPassword(), userDTO.getMatching())) {
+        if (Objects.equals(userDTO.getPassword(), userDTO.getPassword())) {
             repository.save(Objects.requireNonNull(mapper.toUser(userDTO))); //fromUserDTO(userDTO)
             return true;
         } else {
@@ -66,6 +73,76 @@ public class UserServiceImplements implements UserService {
 
 
     @Override
+    public BigDecimal getBalance(UserDTO userDTO) {
+        return userDTO.getBalance();
+    }
+
+    @Override
+    @Transactional
+    public Boolean addUser(@NotNull UserDTO userDTO) {
+        User user = findByName(userDTO.getUsername());
+        if (user != null) return false;
+        userDTO.setActivationCode(UUID.randomUUID().toString());
+        if (userDTO.getRole() == null) userDTO.setRole(Role.CLIENT);
+        userDTO.setBalance(new BigDecimal("0.0"));
+        repository.save(mapper.toUser(userDTO));
+        if (!StringUtils.isEmpty(userDTO.getEmail())) {
+            String message = String.format(
+                    """
+                            Hello, %s
+                            Welcome to PicSHOP.
+                            Please follow this link to verify the validity of your account:
+                            http://localhost:8080/users/activate/%s
+                            If this is not your account - do not click on the link!""",
+                    userDTO.getUsername(),
+                    userDTO.getActivationCode()
+
+            );
+
+            mailSender.send(userDTO.getEmail(), "PicSHOP verify", message);
+        }
+        return true;
+    }
+
+    @Override
+    public Boolean verifyUser(String code) {
+        User user = repository.findByActivationCode(code);
+
+        if (user == null) return false;
+
+        user.setVerified(true);
+        user.setActivationCode(null);
+
+        repository.save(user);
+
+        String message = String.format(
+                """
+                        Hello, %s
+                        Thanks for confirming the account!
+                        """,
+                user.getName());
+        mailSender.send(user.getEmail(), "PicSHOP verify", message);
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public void banUserById(Long id) {
+        UserDTO user = getById(id).orElseThrow();
+        user.setArchive(true);
+        save(user);
+    }
+
+    @Override
+    @Transactional
+    public void unBanUserById(Long id) {
+        UserDTO user = getById(id).orElseThrow();
+        user.setArchive(false);
+        save(user);
+    }
+
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public List<UserDTO> updateUser(User user) {
         if (getById(user.getId()).isPresent()) {
@@ -81,24 +158,38 @@ public class UserServiceImplements implements UserService {
 
     @Override
     @Transactional
-    public void updateProfile(UserDTO userDTO) {
-        boolean isChanged = false;
-        User save = repository.findFirstByName(userDTO.getUsername());
+    public void updateProfile(UserDTO userDTO, String name) {
+
+        User save = repository.findFirstByName(name);
         if (save == null) {
-            throw new RuntimeException("User not found" + userDTO.getUsername());
+            throw new RuntimeException("User not found " + userDTO.getUsername());
         }
+        boolean isChanged = false;
 
-        if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
-            save.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        if (passwordEncoder.matches(userDTO.getPassword(), save.getPassword())
+                && Objects.equals(userDTO.getNewPassword(), userDTO.getMatching())) {
+            save.setPassword(passwordEncoder.encode(userDTO.getNewPassword()));
+            isChanged = true;
         }
-
-        if (Objects.equals(userDTO.getEmail(), save.getEmail())) {
+        if (!Objects.equals(userDTO.getEmail(), save.getEmail())) {
             save.setEmail(userDTO.getEmail());
+            isChanged = true;
+        }
+
+        if (!Objects.equals(userDTO.getUsername(), save.getName())) {
+            save.setName(userDTO.getUsername());
+            isChanged = true;
+        }
+
+        if (!Objects.equals(userDTO.getPhoto(), save.getPhoto())) {
+            save.setPhoto(userDTO.getPhoto());
             isChanged = true;
         }
         if (isChanged) {
             repository.save(save);
+            
         }
+
     }
 
     @Override
@@ -113,24 +204,14 @@ public class UserServiceImplements implements UserService {
     }
 
     @Override
+    public void save(User user) {
+        repository.save(user);
+    }
+
+    @Override
     public CreateUserResponse createUser(CreateUserRequest request) {
         return null;
     }
-
-//    @Override
-//    public CreateUserResponse createUser(CreateUserRequest request) {
-//        CreateUserResponse response;
-//        if (Objects.nonNull(request)
-//                && request.getName() != null
-//                && request.getPassword() != null) {
-//            response = userToUserResponse(
-//                    repository.save(userCreateRequestToUser(request))
-//            );
-//        } else {
-//            response = new CreateUserResponse(400, "User not created");
-//        }
-//        return response;
-//    }
 
     @Override
     public UserDTO updateRole(long id, String role) {
@@ -160,4 +241,5 @@ public class UserServiceImplements implements UserService {
                 roles
         );
     }
+
 }
