@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css">
+    <title>PicSHOP</title>
+</head>
+<body>
+<header th:insert="fragments/header :: header"></header>
+<div class="container mt-5 mb-5">
+    <h1>Redact</h1>
+    <div th:each="el : ${product}">
+        <form method="post">
+            <input type="text" th:value="${el.title}" name="title" placeholder="Enter Name" class="form-control"><br>
+            <input type="text" th:value="${el.price}" name="price" placeholder="Enter Price" class="form-control"><br>
+            <input type="text" th:value="${el.quantity}" name="quantity" placeholder="Enter the number of" class="form-control"><br>
+            <textarea name="productInfo" placeholder="Введите полный текст" class="form-control" th:text="${el.productInfo}"/>
+            <button type="submit" class="btn btn-success">Update</button>
+        </form>
+    </div>
+</div>
+
+</div>
+</body>
+</html>
