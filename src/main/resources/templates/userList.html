@@ -17,6 +17,7 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title text-uppercase mb-0">Manage Users</h5>
+                    <a th:href="@{/users/new}" style="width: 100%" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Add new User</a>
                 </div>
                 <div class="table-responsive">
                     <table class="table no-wrap user-table mb-0">
@@ -44,18 +45,21 @@
                             </td>
                             <td>
                                 <form th:action="'/users/' + ${user.id} + '/delete'" method="post">
-                                <button type="submit" class="btn btn-outline-info btn-circle btn-lg btn-circle ml-2"><i
-                                        class="fa fa-trash"></i></button>
+                                    <button type="submit"
+                                            class="btn btn-outline-info btn-circle btn-lg btn-circle ml-2"><i
+                                            class="fa fa-trash"></i></button>
                                 </form>
-                                <form th:href="'/users/' + ${user.id} + '/edit'" >
-                                <button type="submit" class="btn btn-outline-info btn-circle btn-lg btn-circle ml-2"><i
-                                        class="fa fa-edit"></i></button>
+                                <form th:action="'/users/' + ${user.id} + '/edit'">
+                                    <button type="submit"
+                                            class="btn btn-outline-info btn-circle btn-lg btn-circle ml-2"><i
+                                            class="fa fa-edit"></i></button>
                                 </form>
                             </td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
+
             </div>
         </div>
     </div>
