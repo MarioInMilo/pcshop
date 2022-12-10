@@ -7,5 +7,43 @@
 </head>
 <body>
 <header th:insert="fragments/header :: header"></header>
+<div th:each="product : ${products}">
+    <section class="py-5">
+        <div class="container px-4 px-lg-5 my-5">
+            <div class="row gx-4 gx-lg-5 align-items-center">
+                <div class="col-md-6"><a href="#"  th:href="'/products/' + ${product.id} + '/info'"><img class="card-img-top mb-5 mb-md-0"
+                                           src="https://mdbcdn.b-cdn.net/img/Photos/Horizontal/E-commerce/Products/img%20(4).webp" alt="..."></a></div>
+                <div class="col-md-6">
+                    <h1 class="display-5 fw-bolder" th:text="${product.title}"></h1>
+                    <div class="fs-5 mb-5">
+                        <span  th:if="${product.title != null}">$<span th:text="${product.price}">0</span></span>
+                    </div>
+
+
+                    <p class="lead" th:text="${product.productInfo}">Lorem ipsum dolor sit amet consectetur adipisicing
+                        elit. Praesentium at dolorem
+                        quidem modi. Nam sequi consequatur obcaecati excepturi alias magni, accusamus eius blanditiis
+                        delectus ipsam minima ea iste laborum vero?</p>
+
+                    <div  th:if="${product.title != null}" class="fs-5 mb-5">
+                        <h6>Quantity: <span th:text="${product.quantity}">0</span></h6>
+                    </div>
+                    <div class="d-flex">
+
+                        <form th:if="${product.title != null}" th:action="'/main/' + ${product.id} + '/basket'">
+                            <button class="btn btn-outline-dark flex-shrink-0" type="submit">
+                                <i class="bi-cart-fill me-1"></i>
+                                Add to cart
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
 </body>
 </html>
