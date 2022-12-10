@@ -12,8 +12,14 @@ public class PicshopApplication {
     public static void main(String[] args) {
 
         ConfigurableApplicationContext context =  SpringApplication.run(PicshopApplication.class, args);
-        PasswordEncoder encoder = context.getBean(PasswordEncoder.class);
-        System.out.println(encoder.encode("pass"));
+        System.err.println("""
+                                     -------------
+                ________________________________________________________
+                _____________________---Started---______________________
+                ________________________________________________________
+                                     -------------
+                """);
+
     }
 
 }
