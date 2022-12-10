@@ -13,45 +13,51 @@
             <div class="col">
                 <p><span class="h2">Shopping Cart </span><span class="h4">(1 item in your cart)</span></p>
 
-                <div class="card mb-4">
+                <div th:each="details : ${basket.detailsDTOS}" class="card mb-4">
                     <div class="card-body p-4">
 
                         <div class="row align-items-center">
                             <div class="col-md-2">
-                                <img src="https://mdbcdn.b-cdn.net/img/Photos/Horizontal/E-commerce/Products/1.webp"
+                                <img src="https://mdbcdn.b-cdn.net/img/Photos/Horizontal/E-commerce/Products/img%20(4).webp"
                                      class="img-fluid" alt="Generic placeholder image">
                             </div>
                             <div class="col-md-2 d-flex justify-content-center">
                                 <div>
                                     <p class="small text-muted mb-4 pb-2">Name</p>
-                                    <p class="lead fw-normal mb-0">iPad Air</p>
-                                </div>
-                            </div>
-                            <div class="col-md-2 d-flex justify-content-center">
-                                <div>
-                                    <p class="small text-muted mb-4 pb-2">Color</p>
-                                    <p class="lead fw-normal mb-0"><i class="fas fa-circle me-2" style="color: #fdd8d2;"></i>
-                                        pink rose</p>
+                                    <p class="lead fw-normal mb-0" th:text="${details.title}">***</p>
                                 </div>
                             </div>
                             <div class="col-md-2 d-flex justify-content-center">
                                 <div>
                                     <p class="small text-muted mb-4 pb-2">Quantity</p>
-                                    <p class="lead fw-normal mb-0">1</p>
+                                    <p class="lead fw-normal mb-0" th:text="${details.amount}">1</p>
                                 </div>
                             </div>
                             <div class="col-md-2 d-flex justify-content-center">
                                 <div>
                                     <p class="small text-muted mb-4 pb-2">Price</p>
-                                    <p class="lead fw-normal mb-0">$799</p>
+                                    <p class="lead fw-normal mb-0" th:text="${details.price}">$799</p>
                                 </div>
                             </div>
                             <div class="col-md-2 d-flex justify-content-center">
                                 <div>
                                     <p class="small text-muted mb-4 pb-2">Total</p>
-                                    <p class="lead fw-normal mb-0">$799</p>
+                                    <p class="lead fw-normal mb-0" th:text="${details.sum}">$799</p>
                                 </div>
                             </div>
+                            <div class="col-md-2 d-flex justify-content-center">
+                                <div>
+                                    <form th:action="'/basket/' + ${details.title} + '/deletes'" method="post">
+                                        <button type="submit" class="btn btn-outline-secondary">&#8212;</button>
+                                    </form>
+                                </div>
+                                <div>
+                                    <form th:action="'/basket/' + ${details.title} + '/delete'" method="post">
+                                        <button type="submit" class="btn btn-outline-secondary">&#10060;</button>
+                                    </form>
+                                </div>
+                            </div>
+
                         </div>
 
                     </div>
@@ -63,7 +69,7 @@
                         <div class="float-end">
                             <p class="mb-0 me-5 d-flex align-items-center">
                                 <span class="small text-muted me-2">Order total:</span> <span
-                                    class="lead fw-normal">$799</span>
+                                    class="lead fw-normal">$<span th:text="${basket.sum}">99999999.99</span></span>
                             </p>
                         </div>
 
@@ -71,8 +77,14 @@
                 </div>
 
                 <div class="d-flex justify-content-end">
-                    <button type="button" class="btn btn-light btn-lg me-2">Continue shopping</button>
-                    <button type="button" class="btn btn-primary btn-lg">Add to cart</button>
+                    <form th:action="@{/products}">
+                        <button type="submit" class="btn btn-light btn-lg me-2">Continue
+                            shopping
+                        </button>
+                    </form>
+                    <form th:action="'/basket/' + ${basket.sum} + '/buy'" method="get">
+                        <button type="submit" class="btn btn-primary btn-lg">Add to cart</button>
+                    </form>
                 </div>
 
             </div>
