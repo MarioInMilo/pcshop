@@ -4,13 +4,13 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.Objects;
 
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
@@ -22,10 +22,16 @@ public class User {
     private Long id;
     @Column(name = "name", unique = true)
     private String name;
-
+    @Column(name = "photo")
+    private Byte photo;
     private String password;
     @Column(name = "email", unique = true)
     private String email;
+
+    @Column(name = "balance")
+    private BigDecimal balance;
+
+    private String activationCode;
 
     private Boolean archive;
 
@@ -34,6 +40,8 @@ public class User {
 
     @OneToOne(cascade = CascadeType.REMOVE)
     private Basket basket;
+
+    private Boolean verified;
 
     @Override
     public boolean equals(Object o) {
