@@ -1,29 +1,22 @@
 package by.itstep.picshop.controller;
 
 import by.itstep.picshop.dto.UserDTO;
-import by.itstep.picshop.mapper.ProductMapper;
+import by.itstep.picshop.mapper.MapperUser;
 import by.itstep.picshop.mapper.UseMapper;
 import by.itstep.picshop.model.Role;
 import by.itstep.picshop.model.User;
 import by.itstep.picshop.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
-//import static by.itstep.picshop.mapper.UserMapper.fromUserDTO;
-//import static by.itstep.picshop.mapper.UserMapper.toUserDTO;
-
 @Controller
-//@RestController
 @RequestMapping("/users")
 public class UserController {
 
@@ -31,7 +24,7 @@ public class UserController {
     private UserService userService;
     private final UseMapper mapper = UseMapper.MAPPER;
 
-
+    @PreAuthorize("hasAuthority('ADMIN', 'DIRECTOR', 'MANAGER')")
     @GetMapping
     public String userList(Model model) {
         List<UserDTO> all = userService.getAll();
@@ -48,72 +41,82 @@ public class UserController {
 
     @PostMapping("/new")
     public String saveUser(UserDTO userDTO, Model model) {
-        userDTO.setRole(Role.CLIENT);
-        if (userService.save(userDTO)) {
-            return "redirect:/users";
+        if (userService.addUser(userDTO)) {
+            return "redirect:/";
         } else {
             model.addAttribute("user", userDTO);
             return "user";
         }
     }
 
-    @GetMapping("/profile")
-    public String profileUser(Model model, Principal user) {
-        if (user == null) {
-            throw new RuntimeException("Not authorize");
+    @GetMapping("/activate/{code}")
+    public String activate(Model model,
+                           @PathVariable(value = "code") String code) {
+        Boolean isActivated = userService.verifyUser(code);
+        if (isActivated) {
+            model.addAttribute("message", "success");
+        } else {
+            model.addAttribute("message", "user not found");
         }
-        User user1 = userService.findByName(user.getName());
+
+        return "redirect:/";
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/profile")
+    public String profileUser(Model model, Principal principal) {
+        if (principal == null) {
+            throw new RuntimeException("You are not authorize");
+        }
+        User user1 = userService.findByName(principal.getName());
 
         model.addAttribute("user", mapper.fromUser(user1));
         return "profile";
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/profile")
-    public String updateProfileUser(UserDTO dto, Model model, Principal user) {
-        if (user == null || !Objects.equals(user.getName(), dto.getUsername())) {
-            throw new RuntimeException("Not authorize");
+    public String updateProfileUser(UserDTO dto, Model model, Principal principal) {
+        if (principal == null) {
+            throw new RuntimeException("You are not authorize2");
         }
         if (dto.getPassword() != null &&
                 !dto.getPassword().isEmpty() &&
-                !Objects.equals(dto.getPassword(), dto.getMatching())) {
+                !Objects.equals(dto.getNewPassword(), dto.getMatching())) {
             model.addAttribute("user", dto);
             return "profile";
         }
-        userService.updateProfile(dto);
-        return "redirect:/users/profile";
+        userService.updateProfile(dto, principal.getName());
+        return "redirect:/logout";
     }
 
+    @PreAuthorize("hasAuthority('ADMIN', 'DIRECTOR', 'MANAGER')")
     @PostMapping("/{id}/delete")
     public String deleteUser(@PathVariable(value = "id") long id) {
         userService.deleteUser(userService.getById(id).orElseThrow());
         return "redirect:/users";
     }
 
-    // переделать ---->
-    @PostMapping("/{id}/edit")
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/{id}/edit")
     public String userEdit(@PathVariable(value = "id") long id, Model model) {
-
         if (!userService.existUserById(id)) return "redirect:/users";
-
-
-//        Optional<User> user = Optional.ofNullable(
-//                fromUserDTO(
-//                        userService.getById(id)
-//                                .get()));
-        List<UserDTO> list = new ArrayList<>();
-//        user.ifPresent(list::add);
-        Optional<UserDTO> us = userService.getById(id);
-        us.ifPresent(list::add);
-
-        model.addAttribute("user", us.stream().collect(Collectors.toList()));
+        Optional<UserDTO> user = userService.getById(id);
+        model.addAttribute("user", user.stream().collect(Collectors.toList()));
         return "editProfile";
     }
 
-    @PostMapping("/{id}/{role}")
-//    @PreAuthorize(Role.MANAGER)
-    public String changeRole(@PathVariable(value = "id") long id, @PathVariable(value = "role") String role, Model model) {
-        UserDTO userDTO = userService.updateRole(id, role);
-        model.addAttribute("user", userDTO);
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/{id}/edit")
+    public String updateUser(@PathVariable(value = "id") long id,
+                             @RequestParam String username,
+                             @RequestParam String email,
+                             @RequestParam String role) {
+        UserDTO userDTO = userService.getById(id).orElseThrow();
+        userDTO.setUsername(username);
+        userDTO.setEmail(email);
+        userDTO.setRole(Role.valueOf(role));
+        userService.updateUser(MapperUser.toUser(userDTO));
         return "redirect:/users";
     }
 
