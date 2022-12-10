@@ -16,7 +16,6 @@
                     <div class="card" style="border-radius: 15px;">
                         <div class="card-body p-5">
                             <h2 class="text-uppercase text-center mb-5">Create an account</h2>
-
                             <form th:action="@{/users/new}" th:object="${user}" method="POST">
                                 <div class="form-outline mb-4">
                                     <input th:field="*{username}" type="text" id="form3Example1cg"
@@ -40,6 +39,15 @@
                                     <input th:field="*{matching}" type="password" id="form3Example4cdg"
                                            class="form-control form-control-lg"/>
                                     <label class="form-label" for="form3Example4cdg">Repeat your password</label>
+                                </div>
+                                <div class="form-outline mb-4" sec:authorize="hasAnyAuthority('ADMIN', 'DIRECTOR')">
+                                <select th:field="*{role}" name="role" class="select form-control-lg">
+                                    <option value="null" disabled>Role</option>
+                                    <option value="USER">USER</option>
+                                    <option value="ADMIN">ADMIN</option>
+                                    <option value="MANAGER">MANAGER</option>
+                                    <option sec:authorize="hasAnyAuthority('DIRECTOR')" value="DIRECTOR">DIRECTOR</option>
+                                </select>
                                 </div>
 
                                 <div class="form-check d-flex justify-content-center mb-5">
